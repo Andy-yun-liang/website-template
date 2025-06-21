@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+
+@theme {
+    --color-mudgreen: #222B19;
+    --color-antiflashwhite : #e5ebea
+}
