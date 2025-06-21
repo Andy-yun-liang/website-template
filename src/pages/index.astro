@@ -3,12 +3,12 @@ import { getCollection } from "astro:content"
 import BaseLayout from "../layouts/BaseLayout.astro"
 import Carousel from "../components/carousel"
 import Navbar from "../components/navbar"
-const teamData = await getCollection("team")
-console.log(teamData)
+import About from "../components/about"
+
 ---
 
 <BaseLayout>
 <Navbar client:load/>
 <Carousel client:load/>
-
+<About client: load/>
 </BaseLayout>
