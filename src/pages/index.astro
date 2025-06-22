@@ -3,12 +3,13 @@ import { getCollection } from "astro:content"
 import BaseLayout from "../layouts/BaseLayout.astro"
 import Carousel from "../components/carousel"
 import Navbar from "../components/navbar"
-import About from "../components/about"
-
+import About from "../components/about/index.astro"
+import ImageGallery from "../components/imageGallery"
 ---
 
 <BaseLayout>
 <Navbar client:load/>
 <Carousel client:load/>
-<About client: load/>
+<About/>
+<ImageGallery client:load/>
 </BaseLayout>
