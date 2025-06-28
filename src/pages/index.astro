@@ -1,15 +1,22 @@
 ---
-import { getCollection } from "astro:content"
 import BaseLayout from "../layouts/BaseLayout.astro"
 import Carousel from "../components/carousel"
-import Navbar from "../components/navbar"
 import About from "../components/about/index.astro"
 import ImageGallery from "../components/imageGallery"
+import Subscribe from "../components/Subscribe"
+import Map from "../components/BusinessLocation"
+import InverseSVGIllustration from "../components/InverseSVGIllustration"
 ---
 
-<BaseLayout>
-<Navbar client:load/>
+<BaseLayout pageTitle = "Home - Vely beauty">
 <Carousel client:load/>
 <About/>
 <ImageGallery client:load/>
+<Subscribe client:load/>
+<div class = "py-20">
+    <InverseSVGIllustration/>
+    <Map client:load/>
+
+</div>
+
 </BaseLayout>
