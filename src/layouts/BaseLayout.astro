@@ -1,16 +1,22 @@
 ---
 import './src/styles/global.css'
+import SVGIllustration from '../components/SVGIllustration'
+import Navbar from '../components/navbar'
+const {pageTitle} = Astro.props;
 ---
 
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<script src="https://kit.fontawesome.com/f77f6b11f4.js" crossorigin="anonymous"></script>
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Trevor's Consultancy</title>
+		<title>{pageTitle}</title>
 	</head>
-	<body>
+	<body class = "font-pt-serif">
+		<Navbar client:load/>
         <slot/>
+		<SVGIllustration/>
 	</body>
 </html>

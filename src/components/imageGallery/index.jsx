@@ -1,7 +1,5 @@
-// src/components/ImageGalleryWithText.jsx
-import { useState, useEffect } from "react";
-import { motion, useAnimation } from "framer-motion";
-import { useInView } from "react-intersection-observer";
+import { useState, useRef } from "react";
+import { motion, useMotionValue, useAnimation, AnimatePresence } from "framer-motion";
 
 import writing from "../../assets/writing.jpg";
 import handshake from "../../assets/handshake.jpg";
@@ -31,102 +29,89 @@ const items = [
   },
 ];
 
+const imageVariants = {
+  initial: { opacity: 0, x: 40 },
+  animate: { opacity: 1, x: 0, transition: { duration: 0.6 } },
+  exit: { opacity: 0, x: -40, transition: { duration: 0.4 } },
+};
+
 export default function ImageGalleryWithText() {
   const [selected, setSelected] = useState(0);
-  const controls = useAnimation();
-  const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.2 });
+  const x = useMotionValue(0);
+  const containerRef = useRef(null);
 
-  useEffect(() => {
-    if (inView) controls.start("visible");
-  }, [controls, inView]);
+  const clampIndex = (i) => Math.max(0, Math.min(items.length - 1, i));
 
-  const container = {
-    hidden: {},
-    visible: { transition: { staggerChildren: 0.2 } },
-  };
-  const imgVariant = {
-    hidden: { opacity: 0, scale: 0.9, y: 20 },
-    visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.6 } },
-    hover: { scale: 1.05, transition: { duration: 0.2 } },
-  };
+  const handleDragEnd = (_, info) => {
+    const offset = info.offset.x;
+    const velocity = info.velocity.x;
 
-  const offsetStep = 40; // smaller offsets so cascade fits smaller screens better
-  const baseZ = items.length;
+    const swipe = Math.abs(offset) > 100 || Math.abs(velocity) > 500;
+    if (!swipe) return;
 
-  // Responsive image widths
-  const getImageWidth = () => {
-    if (window.innerWidth < 640) return 180; // sm and below
-    if (window.innerWidth < 1024) return 240; // md and below
-    return 320; // lg and above
+    if (offset < 0) {
+      setSelected((prev) => clampIndex(prev + 1));
+    } else {
+      setSelected((prev) => clampIndex(prev - 1));
+    }
   };
 
-  // Compute total cascade width based on image width & offsetStep
-  const imageWidth = getImageWidth();
-  const totalCascadeWidth = imageWidth + offsetStep * (items.length - 1);
+  const item = items[selected];
 
   return (
-    <section ref={ref} className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-20 py-24">
-      <div className="flex flex-col-reverse lg:flex-row items-center justify-center gap-16">
-        {/* Left: image cascade */}
-        <motion.div
-          className="relative w-full lg:w-1/2 h-[520px]"
-          variants={container}
-          initial="hidden"
-          animate={controls}
-        >
-          <div
-            className="relative h-full mx-auto"
-            style={{
-              width: totalCascadeWidth,
-              maxWidth: "90vw", // keep it within viewport on small screens
-              left: "50%",
-              transform: "translateX(-50%)",
-            }}
-          >
-            {items.map(({ src, alt }, idx) => {
-              const defaultZ = baseZ - idx;
-              const top = offsetStep * idx;
-              const left = offsetStep * idx;
-              const zIndex = idx === selected ? baseZ + 1 : defaultZ;
-
-              return (
-                <motion.img
-                  key={alt}
-                  src={src}
-                  alt={alt}
-                  variants={imgVariant}
-                  whileHover="hover"
-                  onClick={() => setSelected(idx)}
-                  style={{
-                    position: "absolute",
-                    top,
-                    left,
-                    zIndex,
-                    width: imageWidth,
-                    maxWidth: "100%",
-                  }}
-                  className={`rounded-2xl shadow-2xl border-4 border-white object-cover cursor-pointer transition-transform duration-200 ${
-                    selected === idx ? "ring-4 ring-mudgreen" : ""
-                  }`}
-                  draggable={false}
-                />
-              );
-            })}
-          </div>
-        </motion.div>
-
-        {/* Right: dynamic text */}
-        <div className="w-full lg:w-1/2 space-y-6 text-center lg:text-left px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold uppercase tracking-wide text-mudgreen">
-            {items[selected].title}
+    <section className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-20 py-24">
+      <div className="flex flex-col-reverse lg:flex-row gap-12 items-center justify-between">
+        {/* Text Content */}
+        <div className="w-full lg:w-1/2 text-center lg:text-left space-y-6">
+          <h2 className="text-4xl font-bold tracking-tight text-mudgreen">
+            {item.title}
           </h2>
-          <p className="text-lg text-gray-700 leading-relaxed">{items[selected].text}</p>
+          <p className="text-lg text-gray-700 leading-relaxed">{item.text}</p>
           <button
-            className="inline-block px-6 py-3 bg-mudgreen text-white rounded-2xl shadow hover:bg-opacity-90 transition"
-            onClick={() => console.log("CTA clicked for", items[selected].title)}
+            onClick={() => console.log("CTA clicked for", item.title)}
+            className="px-6 py-3 bg-mudgreen text-white rounded-xl shadow hover:bg-opacity-90 transition"
           >
             Learn More
           </button>
+
+          {/* Dot Navigation */}
+          <div className="flex justify-center lg:justify-start gap-2 mt-6">
+            {items.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setSelected(idx)}
+                className={`w-3 h-3 rounded-full transition-all ${
+                  idx === selected ? "bg-mudgreen scale-125" : "bg-gray-300"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Swipeable Image Area */}
+        <div className="w-full lg:w-1/2 overflow-hidden">
+          <motion.div
+            ref={containerRef}
+            className="relative aspect-video rounded-2xl overflow-hidden shadow-xl"
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            onDragEnd={handleDragEnd}
+            style={{ x }}
+          >
+            <AnimatePresence mode="wait">
+              <motion.img
+                key={item.src}
+                src={item.src}
+                alt={item.alt}
+                className="absolute w-full h-full object-cover"
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                variants={imageVariants}
+                draggable={false}
+              />
+            </AnimatePresence>
+          </motion.div>
         </div>
       </div>
     </section>
