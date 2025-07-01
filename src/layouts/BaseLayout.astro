@@ -2,7 +2,18 @@
 import './src/styles/global.css'
 import SVGIllustration from '../components/SVGIllustration'
 import Navbar from '../components/navbar'
+import { getEntry } from 'astro:content'
+export const prerender = false;
+
+
+
+
 const {pageTitle} = Astro.props;
+const topbarEntry = await getEntry("topbar", "default");
+const topbar = topbarEntry?.data;
+
+
+console.log(topbar)
 ---
 
 <html lang="en">

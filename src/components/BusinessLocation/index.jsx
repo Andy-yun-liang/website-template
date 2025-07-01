@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 const GOOGLE_MAPS_API_KEY = import.meta.env.PUBLIC_GOOGLE_MAPS_API_KEY;
 
 const INITIAL_COORDS = { lat: 49.2699213, lng: -123.0444667 };
-const BUSINESS_NAME = "Glo Salon & Lash Supply";
+const BUSINESS_NAME = "Vely Beauty";
 
 function BusinessLocationMap() {
   const mapRef = useRef(null);
